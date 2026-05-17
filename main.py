@@ -1,3 +1,3 @@
-from agents.main_agent import MainAgent
+from agents.orchestrator import Orchestrator
 
-app = MainAgent().app
+app = Orchestrator().app

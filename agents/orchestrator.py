@@ -1,8 +1,8 @@
-from fastapi import FastAPI
 from agents.reporter import ReporterAgent, ReporterOptions
+from fastapi import FastAPI
 
 
-class MainAgent:
+class Orchestrator:
     def __init__(self) -> None:
         self.app = FastAPI()
         self.reporterAgent = ReporterAgent()

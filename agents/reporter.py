@@ -1,6 +1,6 @@
-from agno.agent import Agent
 from agno.models.ollama import Ollama
 from pydantic import BaseModel
+from agno.agent import Agent
 
 
 class ReporterOptions(BaseModel):
