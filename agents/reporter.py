@@ -1,8 +1,13 @@
 from agno.agent import Agent
 from agno.models.ollama import Ollama
+from pydantic import BaseModel
 
 
-class ReporterAgent(Agent):
+class ReporterOptions(BaseModel):
+    prompt: str
+
+
+class ReporterAgent(Agent):  # Implementar assincronismo
     def __init__(self):
         super().__init__(
             model=Ollama(id="llama3.1:8b"),
