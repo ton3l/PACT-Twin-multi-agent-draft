@@ -1,19 +1,13 @@
 [workspace]
+authors = ["elton-nascimento <elton.felype.s.nascimento@gmail.com>"]
 channels = ["conda-forge"]
 name = "PACT-Twin-multi-agent"
-platforms = ["linux-64"]
+platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
 [tasks]
-start = "python main.py"
-fastapi-dev = "fastapi dev"
+start = "python src/main.py"
 
 [dependencies]
-python = ">=3.14.4,<3.15"
-fastapi = ">=0.136.1,<0.137"
-pydantic = ">=2.13.4,<3"
-
-[pypi-dependencies]
-agno = ">=2.6.7, <3"
-ollama = ">=0.6.2, <0.7"
-openai = ">=2.37.0, <3"
+langgraph = ">=1.2.4,<2"
+python = ">=3.14.5,<3.15"

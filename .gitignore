@@ -4,3 +4,8 @@
 
 # python bytecode
 __pycache__
+
+# environment variables
+.env
+.env.dev
+.env.prod
