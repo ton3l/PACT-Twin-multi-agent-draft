@@ -5,7 +5,16 @@
 # python bytecode
 __pycache__
 
+# VS code
+.vscode
+
 # environment variables
 .env
 .env.dev
 .env.prod
+
+# Objects
+*.png
+*.pdf
+*.jpg
+*.jpeg
