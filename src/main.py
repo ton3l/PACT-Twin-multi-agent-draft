@@ -1,34 +1,40 @@
 from typing import cast
 from langchain.messages import AnyMessage
 from langgraph.graph import END, StateGraph, START
-from agents.states.messages_state import MessagesState
-from agents.calculator import calculator_agent
+from langgraph.prebuilt import ToolNode
+from models.llama3_1_8b import model
+from states.messages_state import MessagesState
+from agents.calculator import def_calculator_agent
 from nodes.loop_node import loop_node
-from nodes.tool_node import tool_node
 from langchain.messages import HumanMessage
+from tools.arithmetics import ARITHMETIC_TOOLS
 
-graph = StateGraph(MessagesState)
 
-graph.add_node("agent", calculator_agent)
-graph.add_node("tool_node", tool_node)
+def main():
+    graph = StateGraph(MessagesState)
 
-graph.add_edge(START, "agent")
-graph.add_conditional_edges(
-   "agent",
-   loop_node,
-   ["tool_node", END]
-)
-graph.add_edge("tool_node", "agent")
+    graph.add_node("agent", def_calculator_agent(model(), ARITHMETIC_TOOLS))
+    graph.add_node("tool_node", ToolNode(ARITHMETIC_TOOLS))
 
-agent = graph.compile()
+    graph.add_edge(START, "agent")
+    graph.add_conditional_edges("agent", loop_node, ["tool_node", END])
+    graph.add_edge("tool_node", "agent")
 
-with open("graph.png", "wb") as f:
-    f.write(agent.get_graph(xray=True).draw_mermaid_png())
-print("Grafo salvo em graph.png")
+    agent = graph.compile()
 
-# Invoke
-messages: list[AnyMessage] = [HumanMessage(content="divide 10 and 4.")]
-input_state: MessagesState = {"messages": messages, "llm_calls": 0}
-result = cast(MessagesState, agent.invoke(input_state))
-for m in result["messages"]:
-    m.pretty_print()
+    # with open("graph.png", "wb") as f:
+    # f.write(agent.get_graph(xray=True).draw_mermaid_png())
+    # print("Grafo salvo em graph.png")
+
+    # Invoke
+    messages: list[AnyMessage] = [
+        HumanMessage(content=input("Pergunte ao agente calculador: "))
+    ]
+    input_state: MessagesState = {"messages": messages, "llm_calls": 0}
+    result = cast(MessagesState, agent.invoke(input_state))
+    for m in result["messages"]:
+        m.pretty_print()
+
+
+if __name__ == "__main__":
+    main()

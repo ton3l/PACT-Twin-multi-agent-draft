@@ -24,13 +24,13 @@ The system follows a **graph-based agent loop** pattern:
 START → agent (LLM) → loop_node (conditional) → tool_node → agent → … → END
 ```
 
-- **Agent Node** (`src/agents/calculator.py`): Invokes the LLM with a system prompt and bound tools. Returns the LLM response and increments `llm_calls`.
-- **Tool Node** (`src/nodes/tool_node.py`): Iterates over tool calls from the last LLM message, invokes each tool, and appends `ToolMessage` results.
+- **Agent Node** (`src/agents/calculator.py`): Factory function that injects the LLM and bound tools, returning the pure node function.
+- **Tool Node** (`langgraph.prebuilt.ToolNode`): Native LangGraph node that executes tool calls from the last LLM message.
 - **Loop Node** (`src/nodes/loop_node.py`): Conditional router — if the last message contains tool calls, routes back to `tool_node`; otherwise ends the graph.
 
 ### State
 
-Defined in `src/agents/states/messages_state.py` as a `TypedDict`:
+Defined in `src/states/messages_state.py` as a `TypedDict`:
 - `messages`: `list[AnyMessage]` — accumulated via `operator.add` (append-only reducer).
 - `llm_calls`: `int` — counts how many times the LLM has been invoked.
 
@@ -47,16 +47,15 @@ Defined in `src/agents/states/messages_state.py` as a `TypedDict`:
 └── src/
     ├── main.py                      # Entrypoint — builds and runs the StateGraph
     ├── agents/
-    │   ├── calculator.py            # Calculator agent definition
-    │   ├── models/
-    │   │   └── llama3_1_8b.py       # ChatOllama model instance
-    │   ├── states/
-    │   │   └── messages_state.py    # MessagesState TypedDict (graph state schema)
-    │   └── tools/
-    │       └── arithmetics.py       # @tool functions: multiply, add, subtract
+    │   └── calculator.py            # Calculator agent definition (Factory)
+    ├── models/
+    │   └── llama3_1_8b.py           # ChatOllama model factory
+    ├── states/
+    │   └── messages_state.py        # MessagesState TypedDict (graph state schema)
+    ├── tools/
+    │   └── arithmetics.py           # @tool functions: multiply, add, subtract
     └── nodes/
-        ├── loop_node.py             # Conditional edge — continue or end the loop
-        └── tool_node.py             # Executes tool calls from the last LLM message
+        └── loop_node.py             # Conditional edge — continue or end the loop
 ```
 
 ## Conventions & Rules
@@ -68,12 +67,13 @@ Defined in `src/agents/states/messages_state.py` as a `TypedDict`:
 - **Docstrings**: Every public function and class must have a docstring.
 - **Imports**: Use relative imports within `src/` subpackages (e.g., `from models.llama3_1_8b import model`).
 
-### Project Structure
-- **Agents** go in `src/agents/`. Each agent is a function that takes state and returns a state update dict.
-- **Tools** go in `src/agents/tools/`. Each tool is decorated with `@tool` from `langchain.tools` and must have a docstring with `Args:` section for LLM schema generation.
-- **Models** go in `src/agents/models/`. Each file exports a configured LLM instance.
-- **States** go in `src/agents/states/`. State schemas are `TypedDict` subclasses.
-- **Nodes** go in `src/nodes/`. Graph nodes that are not agents (e.g., tool execution, conditional routing).
+### Project Structure & Functional Paradigm
+The project strictly follows a **functional paradigm** and Dependency Injection, as standard in LangGraph:
+- **Agents** (`src/agents/`): Defined as Factory functions that receive dependencies (LLMs, tools) and return the pure node function (e.g., `def_calculator_agent(llm, tools)`).
+- **Tools** (`src/tools/`): Each tool is decorated with `@tool` from `langchain.tools`. They are exported as explicit immutable global lists (e.g., `ARITHMETIC_TOOLS = [multiply, add, subtract]`) using `UPPER_SNAKE_CASE`.
+- **Models** (`src/models/`): Exported as factory getter functions (e.g., `def model() -> BaseChatModel`) to avoid side effects on import.
+- **States** (`src/states/`): State schemas are `TypedDict` subclasses to maintain functional purity (dumb data containers).
+- **Nodes** (`src/nodes/`): Custom graph nodes. Tool execution relies on the native `ToolNode` from `langgraph.prebuilt`.
 
 ### Development Workflow
 - **Install dependencies**: `pixi install`

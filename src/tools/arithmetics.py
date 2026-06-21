@@ -1,33 +1,37 @@
 from langchain.tools import tool
 
+
 @tool
 def multiply(a: int, b: int) -> int:
     """Multiply `a` and `b`.
-    
+
     Args:
         a: First int
         b: Second int
     """
     return a * b
 
+
 @tool
 def add(a: int, b: int) -> int:
     """Sum `a` and `b`.
-    
+
     Args:
         a: First int
         b: Second int
     """
     return a + b
 
+
 @tool
 def subtract(a: int, b: int) -> int:
     """Subtract `a` and `b`.
-    
+
     Args:
         a: First int
         b: Second int
     """
     return a - b
 
-ARITHMETIC_TOOLS = {tool.name: tool for tool in vars().values() if hasattr(tool, "tool_call_schema")}
+
+ARITHMETIC_TOOLS = [multiply, add, subtract]
