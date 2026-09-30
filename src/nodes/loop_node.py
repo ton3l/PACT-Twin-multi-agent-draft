@@ -1,7 +1,7 @@
 from langchain_core.messages import AIMessage
 from langgraph.graph import END
 
-from states.messages_state import MessagesState
+from graph_state import MessagesState
 
 
 def loop_node(state: MessagesState) -> str:

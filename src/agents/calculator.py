@@ -2,8 +2,8 @@ from langchain.messages import SystemMessage
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.tools import BaseTool
 
+from graph_state import GraphState
 from prompts.calculator_prompts import CALCULATOR_SYSTEM_PROMPT
-from states.messages_state import MessagesState
 
 
 def def_calculator_agent(llm: BaseChatModel, tools: list[BaseTool]):
@@ -11,7 +11,7 @@ def def_calculator_agent(llm: BaseChatModel, tools: list[BaseTool]):
 
     agent = llm.bind_tools(tools)
 
-    def calculator_agent(state: MessagesState):
+    def calculator_agent(state: GraphState):
         """LLM doing a calculator role"""
 
         return {

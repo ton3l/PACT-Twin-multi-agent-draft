@@ -7,18 +7,18 @@ from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode
 
 from agents.calculator import def_calculator_agent
+from graph_state import GraphState
 from llms.gpt_oss_120b import gpt_oss_120b
 from nodes.loop_node import loop_node
-from states.messages_state import MessagesState
 from tools.arithmetics import ARITHMETIC_TOOLS
 
 
 class Agent:
     _agent: CompiledStateGraph
-    _state: MessagesState
+    _state: GraphState
 
     def __init__(self) -> None:
-        graph = StateGraph(MessagesState)
+        graph = StateGraph(GraphState)
         
         graph.add_node("agent", def_calculator_agent(gpt_oss_120b(), ARITHMETIC_TOOLS))
         graph.add_node("tool_node", ToolNode(ARITHMETIC_TOOLS))
@@ -34,7 +34,7 @@ class Agent:
 
     async def chat(self, input: str):
         self._state["messages"].append(HumanMessage(content=input))
-        self._state = cast(MessagesState, await self._agent.ainvoke(self._state))
+        self._state = cast(GraphState, await self._agent.ainvoke(self._state))
         return cast(str, self._state["messages"][-1].content)
         
 

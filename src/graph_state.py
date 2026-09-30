@@ -5,6 +5,6 @@ from langchain.messages import AnyMessage
 from typing_extensions import TypedDict
 
 
-class MessagesState(TypedDict):
+class GraphState(TypedDict):
     messages: Annotated[list[AnyMessage], operator.add]
     llm_calls: int
